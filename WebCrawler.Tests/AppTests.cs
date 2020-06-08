@@ -121,7 +121,7 @@ namespace WebCrawler.Tests
         public async Task When_AsyncEnumerableStrategyExecute_Then_SaveRequestResultIsCalled()
         {
             // Arrange
-            var appOptions = new AppOptions(_urls, 2, "test.txt", "async");
+            var appOptions = new AppOptions(_urls, 2, "test.txt", "asyncenum");
             var strategy = new AsyncEnumerableStrategy(_httpClientFactory, appOptions, _resultSaverMock.Object);
 
             // Act
