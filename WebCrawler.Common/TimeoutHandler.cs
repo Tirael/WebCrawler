@@ -17,7 +17,9 @@ namespace WebCrawler.Common
 
             try
             {
-                return await base.SendAsync(request, cts?.Token ?? cancellationToken);
+                return await base
+                    .SendAsync(request, cts?.Token ?? cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {

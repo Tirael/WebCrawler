@@ -1,14 +1,16 @@
-﻿namespace WebCrawler.Common
+﻿using System;
+
+namespace WebCrawler.Common
 {
     public class RequestResult
     {
-        public string Url { get; }
+        public Uri Uri { get; }
         public string MediaType { get; }
         public long? ContentLength { get; }
 
-        public RequestResult(string url, string mediaType, long? contentLength)
+        public RequestResult(Uri uri, string mediaType, long? contentLength)
         {
-            Url = url;
+            Uri = uri;
             MediaType = mediaType;
             ContentLength = contentLength;
         }

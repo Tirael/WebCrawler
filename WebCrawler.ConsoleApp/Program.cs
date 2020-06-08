@@ -4,11 +4,11 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using WebCrawler.Common;
 using WebCrawler.Common.Interfaces;
+using WebCrawler.Common.Strategies;
 
 namespace WebCrawler.ConsoleApp
 {
@@ -23,12 +23,13 @@ namespace WebCrawler.ConsoleApp
         static async Task Main(string[] args) => await BuildCommandLine()
             .UseDefaults()
             .Build()
-            .InvokeAsync(args);
+            .InvokeAsync(args)
+            .ConfigureAwait(false);
 
         private static CommandLineBuilder BuildCommandLine()
         {
             var root = new RootCommand(
-                "$ dotnet run --urls 'url1' 'url2' --max-degree-of-parallelism 1 --output-file result.txt")
+                "$ dotnet run --urls 'url1' 'url2' --max-degree-of-parallelism 1 --output-file result.txt --strategy tdf")
             {
                 new Option<List<string>>("--urls")
                 {
@@ -41,6 +42,10 @@ namespace WebCrawler.ConsoleApp
                 new Option<string>("--output-file")
                 {
                     Required = true
+                },
+                new Option<string>("--strategy")
+                {
+                    Required = false
                 }
             };
 
@@ -51,6 +56,8 @@ namespace WebCrawler.ConsoleApp
 
         private static async Task Run(AppOptions options)
         {
+            Console.WriteLine($"Use '{options.SelectedStrategy}' strategy");
+
             using var cts = new CancellationTokenSource();
 
             Console.CancelKeyPress += (sender, eventArgs) =>
@@ -64,9 +71,27 @@ namespace WebCrawler.ConsoleApp
 
             IResultFormatter resultFormatter = new SimpleResultFormatter();
             IResultSaver resultSaver = new TextFileResultSaver(options.OutputFile, resultFormatter);
-            IHttpClientFactory httpClientFactory = new HttpClientFactoryWithTimeoutHandle();
 
-            await new App(httpClientFactory, options, resultSaver).Run(cts.Token);
+            using var httpClientFactory = new HttpClientFactoryWithTimeoutHandle();
+
+            WebCrawlerStrategy crawlerStrategy = options.SelectedStrategy switch
+            {
+                AppOptions.Strategy.TasksDataflow => new TasksDataflowWebCrawlerStrategy(httpClientFactory, options,
+                    resultSaver),
+                AppOptions.Strategy.ParallelLinq => new ParallelLinqWebCrawlerStrategy(httpClientFactory, options,
+                    resultSaver),
+                AppOptions.Strategy.ParallelForEach => new ParallelForEachWebCrawlerStrategy(httpClientFactory, options,
+                    resultSaver),
+                AppOptions.Strategy.Partitioner => new PartitionerWebCrawlerStrategy(httpClientFactory, options,
+                    resultSaver),
+                AppOptions.Strategy.AsyncEnumerable => new AsyncEnumerableStrategy(httpClientFactory, options,
+                    resultSaver),
+                _ => throw new NotImplementedException($"Not implemented strategy: {options.SelectedStrategy}")
+            };
+
+            await new App(crawlerStrategy)
+                .Run(cts.Token)
+                .ConfigureAwait(false);
 
             Console.WriteLine("Finished...");
         }

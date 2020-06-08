@@ -2,7 +2,7 @@
   "profiles": {
     "WebCrawler.ConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "--urls https://example.com/ https://jsonplaceholder.typicode.com/todos/1 https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3 --max-degree-of-parallelism 2 --output-file result.txt"
+      "commandLineArgs": "--urls https://example.com/ https://jsonplaceholder.typicode.com/todos/1 https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3 --max-degree-of-parallelism 2 --output-file result.txt --strategy asyncenum"
     }
   }
 }

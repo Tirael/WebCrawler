@@ -16,7 +16,9 @@ namespace WebCrawler.Common
             _resultFormatter = resultFormatter;
         }
 
-        public async Task SaveAsync(RequestResult requestResult, CancellationToken token) => 
-            await File.AppendAllTextAsync(_outputFileName, _resultFormatter.GetFormattedResult(requestResult), token);
+        public async Task SaveAsync(RequestResult requestResult, CancellationToken token) =>
+            await File
+                .AppendAllTextAsync(_outputFileName, _resultFormatter.GetFormattedResult(requestResult), token)
+                .ConfigureAwait(false);
     }
 }
